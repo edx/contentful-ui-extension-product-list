@@ -181,7 +181,7 @@ export class App extends React.Component {
 
     return (
       <React.Fragment>
-        <FormLabel htmlFor="cardList">A New UI Extension</FormLabel>
+        <FormLabel htmlFor="cardList">Product list selection</FormLabel>
         <TextInput
           width="large"
           type="text"
