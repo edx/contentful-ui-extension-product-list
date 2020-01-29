@@ -100,6 +100,16 @@ export class App extends React.Component {
     });
   };
 
+  removeProduct = product => {
+    const { productList } = this.state;
+
+    console.log('remove me: ', product);
+
+    this.setState({
+      productList: productList.filter(item => item !== product)
+    });
+  }
+
   onSearch = e => {
     console.log(`onSearch: ${this.state.value}`);
     console.log(this.props);
@@ -165,6 +175,7 @@ export class App extends React.Component {
               description="Course"
               entityType="entry"
               isActionsDisabled={false}
+              dropdownListElements={<Button onClick={() => this.removeProduct(product)}>X</Button>}
               status="Course"
               testId="cf-ui-entity-list-item"
               title={product}
