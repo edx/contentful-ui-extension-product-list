@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+
 import {
   Button,
   EntityList,
@@ -8,9 +11,21 @@ import {
   FormLabel,
   TextInput,
 } from '@contentful/forma-36-react-components';
+
 import { init } from 'contentful-ui-extensions-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
+import '@contentful/forma-36-fcss/dist/styles.css';
 import './index.css';
+
+const getCSRFCookie = () => {
+  const prodCookie = Cookies.get('prod-edx-csrftoken');
+
+  if (prodCookie) {
+    return prodCookie;
+  }
+
+  return Cookies.get('csrfToken');
+};
 
 export class App extends React.Component {
   static propTypes = {
@@ -63,7 +78,7 @@ export class App extends React.Component {
   // };
 
   onChange = e => {
-    console.log('changey McChangeFace');
+    // console.log('changey McChangeFace');
     const userInput = e.currentTarget.value;
     const filteredOptions = this.search(userInput);
 
@@ -85,6 +100,40 @@ export class App extends React.Component {
         option.toLowerCase().indexOf(product) > -1 && !productList.includes(option)
     );
   }
+
+  formatQuery = str => {
+    const esc = (str) ? encodeURIComponent(str) : false;
+
+    // if str defined replace its spaces with +
+    return (esc) ? esc.replace(/%20/g, '+') : '';
+  }
+
+  submitSearch = () => {
+    const { userInput } = this.state;
+    const base = 'https://swapi.co/api/people/?search=';
+    // const apiBase = 'https://www.edx.org/api/v1/catalog/search?query=';
+    axios.get(`${base}${this.formatQuery(userInput)}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          // 'Content-Type': 'application/json',
+          // 'X-CSRFToken': getCSRFCookie(),
+        },
+        // crossdomain: true
+        // withCredentials: true,
+      })
+    .then((response) => {
+      console.log('then')
+      if (response.ok || response.status === 200) {
+        return console.log('success: ', response);
+      }
+      const error = new Error(response.statusText);
+      error.response = response;
+
+      return console.log('error in then: ', response);
+    })
+    .catch(error => console.log('error in catch: ', error));
+  };
 
   addProduct = (e) => {
     const product = e.currentTarget.innerText;
@@ -180,6 +229,7 @@ export class App extends React.Component {
               testId="cf-ui-entity-list-item"
               title={product}
               withDragHandle={true}
+              isDragActive={true}
             />)}
         </EntityList>
       </React.Fragment>
@@ -187,28 +237,27 @@ export class App extends React.Component {
   }
 
   render() {
-    console.log('render me');
-    console.log(this.getOptions());
-
     return (
       <React.Fragment>
-        <FormLabel htmlFor="cardList">Product list selection</FormLabel>
-        <TextInput
-          width="large"
-          type="text"
-          name="cardList"
-          id="my-field"
-          testId="my-field"
-          value={this.state.value}
-          onChange={this.onChange}
-        />
-        <Button
-          buttonType="primary"
-          icon="Search"
-          onClick={this.onSearch}
-        >
-          Search
-        </Button>
+        <FormLabel htmlFor="cardList" className="f36-margin-top--l">Product list selection</FormLabel>
+        <div className="product-search-container">
+          <TextInput
+            width="large"
+            type="text"
+            name="cardList"
+            id="my-field"
+            testId="my-field"
+            value={this.state.value}
+            onChange={this.onChange}
+          />
+          <Button
+            buttonType="primary"
+            icon="Search"
+            onClick={this.submitSearch}
+          >
+            Search
+          </Button>
+        </div>
         {this.getOptions()}
         {this.getProducts()}
       </React.Fragment>

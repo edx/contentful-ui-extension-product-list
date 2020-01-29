@@ -8,3 +8,12 @@ div {
   font: inherit;
   vertical-align: baseline;
 }
+
+ul.options {
+  list-style: none;
+  padding: 0;
+}
+
+.product-search-container {
+  display: flex;
+}
