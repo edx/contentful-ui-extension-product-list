@@ -30,7 +30,6 @@ const getCSRFCookie = () => {
 export class App extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired,
-    products: PropTypes.arrayOf(PropTypes.string),
   };
 
   detachExternalChangeHandler = null;
@@ -39,6 +38,7 @@ export class App extends React.Component {
     super(props);
     this.state = {
       productList: props.sdk.field.getValue() || [],
+      productOptions: [],
       activeOption: 0,
       filteredOptions: [],
       showOptions: false,
@@ -64,21 +64,7 @@ export class App extends React.Component {
     console.log('onExternalChange');
   };
 
-  // onChange = e => {
-  //   const value = e.currentTarget.value;
-  //   console.log(`onChange: ${value}`);
-  //   this.setState({ value });
-    
-    // This is clearing the state
-    // if (value) {
-    //   this.props.sdk.field.setValue(value);
-    // } else {
-    //   this.props.sdk.field.removeValue();
-    // }
-  // };
-
   onChange = e => {
-    // console.log('changey McChangeFace');
     const userInput = e.currentTarget.value;
     const filteredOptions = this.search(userInput);
 
@@ -91,13 +77,15 @@ export class App extends React.Component {
   };
 
   search = userInput => {
-    const { products } = this.props;
-    const { productList } = this.state;
+    const { productList, productOptions } = this.state;
     const product = userInput.toLowerCase();
 
-    return products.filter(
-      (option) => 
-        option.toLowerCase().indexOf(product) > -1 && !productList.includes(option)
+    return productOptions.filter(
+      (option) => {
+        const hasBeenSelected = productList.find(product => product.name === option.name);
+
+        return option.name.toLowerCase().indexOf(product) > -1 && !hasBeenSelected
+      }
     );
   }
 
@@ -125,6 +113,9 @@ export class App extends React.Component {
     .then((response) => {
       console.log('then')
       if (response.ok || response.status === 200) {
+        this.setState({
+          productOptions: response.data.results,
+        });
         return console.log('success: ', response);
       }
       const error = new Error(response.statusText);
@@ -136,9 +127,13 @@ export class App extends React.Component {
   };
 
   addProduct = (e) => {
-    const product = e.currentTarget.innerText;
-    const { productList } = this.state;
-    productList.push(product);
+    const { productList, productOptions } = this.state;
+    const productName = e.currentTarget.innerText;
+    const product = productOptions.find(option => option.name === productName);
+
+    if (product) {
+      productList.push(product);
+    }
 
     this.setState({
       activeOption: 0,
@@ -149,13 +144,13 @@ export class App extends React.Component {
     });
   };
 
-  removeProduct = product => {
+  removeProduct = productName => {
     const { productList } = this.state;
 
-    console.log('remove me: ', product);
+    console.log('remove me: ', productName);
 
     this.setState({
-      productList: productList.filter(item => item !== product)
+      productList: productList.filter(item => item.name !== productName)
     });
   }
 
@@ -177,18 +172,18 @@ export class App extends React.Component {
       if (filteredOptions.length) {
         return (
           <ul className="options">
-            {filteredOptions.map((optionName, index) => {
+            {filteredOptions.map((option, index) => {
               let className;
               if (index === activeOption) {
                 className = 'option-active';
               }
               return (
-                <li className={className} key={optionName}>
+                <li className={className} key={option.name}>
                   <Button
                     buttonType="muted"
                     onClick={this.addProduct}
                     className="f36-margin-bottom--m"
-                  >{optionName}
+                  >{option.name}
                   </Button>
                 </li>
               );
@@ -224,10 +219,11 @@ export class App extends React.Component {
               description="Course"
               entityType="entry"
               isActionsDisabled={false}
-              dropdownListElements={<Button onClick={() => this.removeProduct(product)}>X</Button>}
+              dropdownListElements={<Button onClick={() => this.removeProduct(product.name)}>X</Button>}
               status="Course"
               testId="cf-ui-entity-list-item"
-              title={product}
+              title={product.name}
+              key={product.name}
               withDragHandle={true}
               isDragActive={true}
             />)}
@@ -264,17 +260,9 @@ export class App extends React.Component {
     );
   }
 }
-const products = [
-  'Papaya',
-  'Persimmon',
-  'Paw Paw',
-  'Prickly Pear',
-  'Peach',
-  'Pomegranate',
-  'Pineapple'
-];
+
 init(sdk => {
-  ReactDOM.render(<App sdk={sdk} products={products} />, document.getElementById('root'));
+  ReactDOM.render(<App sdk={sdk} />, document.getElementById('root'));
 });
 
 /**
