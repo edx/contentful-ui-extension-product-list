@@ -65,28 +65,31 @@ export class App extends React.Component {
   };
 
   onChange = e => {
-    const userInput = e.currentTarget.value;
-    const filteredOptions = this.search(userInput);
-
-    this.setState({
-      activeOption: 0,
-      filteredOptions,
-      showOptions: true,
-      userInput
-    });
+    this.submitSearch(e.currentTarget.value);
   };
 
-  search = userInput => {
-    const { productList, productOptions } = this.state;
+  // Conduct the actual search against the provided productOptions
+  search = (userInput, productOptions) => {
+    const { productList } = this.state;
+
     const product = userInput.toLowerCase();
 
-    return productOptions.filter(
+    const filteredOptions = productOptions.filter(
       (option) => {
         const hasBeenSelected = productList.find(product => product.name === option.name);
 
         return option.name.toLowerCase().indexOf(product) > -1 && !hasBeenSelected
       }
     );
+console.log(productOptions);
+console.log(filteredOptions);
+    this.setState({
+      activeOption: 0,
+      showOptions: true,
+      userInput,
+      productOptions,
+      filteredOptions,
+    });
   }
 
   formatQuery = str => {
@@ -96,8 +99,8 @@ export class App extends React.Component {
     return (esc) ? esc.replace(/%20/g, '+') : '';
   }
 
-  submitSearch = () => {
-    const { userInput } = this.state;
+  submitSearch = (userInput) => {
+    // const { userInput } = this.state;
     const base = 'https://swapi.co/api/people/?search=';
     // const apiBase = 'https://www.edx.org/api/v1/catalog/search?query=';
     axios.get(`${base}${this.formatQuery(userInput)}`,
@@ -113,9 +116,8 @@ export class App extends React.Component {
     .then((response) => {
       console.log('then')
       if (response.ok || response.status === 200) {
-        this.setState({
-          productOptions: response.data.results,
-        });
+        this.search(userInput, response.data.results);
+
         return console.log('success: ', response);
       }
       const error = new Error(response.statusText);
