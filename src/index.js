@@ -59,6 +59,12 @@ export class App extends React.Component {
     }
   }
 
+  // Test method to output the saved field value
+  checkFieldValue = () => {
+    const fieldValue = this.props.sdk.field.getValue();
+    console.log(fieldValue);
+  }
+
   onExternalChange = value => {
     // this.setState({ value });
     console.log('onExternalChange');
@@ -81,8 +87,7 @@ export class App extends React.Component {
         return option.name.toLowerCase().indexOf(product) > -1 && !hasBeenSelected
       }
     );
-console.log(productOptions);
-console.log(filteredOptions);
+
     this.setState({
       activeOption: 0,
       showOptions: true,
@@ -137,6 +142,8 @@ console.log(filteredOptions);
       productList.push(product);
     }
 
+    this.props.sdk.field.setValue(productList);
+
     this.setState({
       activeOption: 0,
       filteredOption: [],
@@ -148,19 +155,16 @@ console.log(filteredOptions);
 
   removeProduct = productName => {
     const { productList } = this.state;
-
+    const updatedProductList = productList.filter(item => item.name !== productName);
     console.log('remove me: ', productName);
 
+    
+    this.props.sdk.field.setValue(updatedProductList);
+
     this.setState({
-      productList: productList.filter(item => item.name !== productName)
+      productList: updatedProductList
     });
   }
-
-  onSearch = e => {
-    console.log(`onSearch: ${this.state.value}`);
-    console.log(this.props);
-    this.render();
-  };
 
   getOptions = () => {
     const {
@@ -251,7 +255,7 @@ console.log(filteredOptions);
           <Button
             buttonType="primary"
             icon="Search"
-            onClick={this.submitSearch}
+            onClick={this.checkFieldValue}
           >
             Search
           </Button>
