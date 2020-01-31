@@ -10,3 +10,8 @@ npm install
 npm run login && npm run configure
 npm run start
 ```
+
+## To Update for Release
+```sh
+npm run deploy
+```
