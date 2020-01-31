@@ -17,15 +17,6 @@ import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import './index.css';
 
-const getCSRFCookie = () => {
-  const prodCookie = Cookies.get('prod-edx-csrftoken');
-
-  if (prodCookie) {
-    return prodCookie;
-  }
-
-  return Cookies.get('csrfToken');
-};
 
 export class App extends React.Component {
   static propTypes = {
@@ -111,11 +102,7 @@ export class App extends React.Component {
       {
         headers: {
           Accept: 'application/json',
-          // 'Content-Type': 'application/json',
-          // 'X-CSRFToken': getCSRFCookie(),
         },
-        // crossdomain: true
-        // withCredentials: true,
       })
     .then((response) => {
       console.log('then')
@@ -143,8 +130,6 @@ export class App extends React.Component {
           'Content-Type': 'application/json',
           // 'X-CSRFToken': getCSRFCookie(),
         },
-        // crossdomain: true
-        // withCredentials: true,
       })
     .then((response) => {
       console.log('then')
@@ -252,9 +237,10 @@ export class App extends React.Component {
               contentType="MITx"
               description="Course"
               entityType="entry"
+              thumbnailUrl="https://www.placebear.com/46/46"
               isActionsDisabled={false}
               dropdownListElements={<Button onClick={() => this.removeProduct(product.name)}>X</Button>}
-              status="Course"
+              status="published"
               testId="cf-ui-entity-list-item"
               title={product.name}
               key={product.name}
