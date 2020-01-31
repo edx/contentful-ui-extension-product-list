@@ -105,9 +105,8 @@ export class App extends React.Component {
   }
 
   submitSearch = (userInput) => {
-    // const { userInput } = this.state;
     const base = 'https://swapi.co/api/people/?search=';
-    // const apiBase = 'https://www.edx.org/api/v1/catalog/search?query=';
+
     axios.get(`${base}${this.formatQuery(userInput)}`,
       {
         headers: {
@@ -131,6 +130,35 @@ export class App extends React.Component {
       return console.log('error in then: ', response);
     })
     .catch(error => console.log('error in catch: ', error));
+  };
+
+  submitSearchQuery = () => {
+    const userInput = 'bees';
+    const base = 'https://www.edx.org/api/v1/catalog/search?query=';
+
+    axios.get(`${base}${this.formatQuery(userInput)}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          // 'X-CSRFToken': getCSRFCookie(),
+        },
+        // crossdomain: true
+        // withCredentials: true,
+      })
+    .then((response) => {
+      console.log('then')
+      if (response.ok || response.status === 200) {
+        return console.log('success: ', response);
+      }
+      const error = new Error(response.statusText);
+      error.response = response;
+
+      return console.log('error in then: ', response);
+    })
+    .catch(error => console.log('error in catch: ', error));
+
+    this.checkFieldValue();
   };
 
   addProduct = (e) => {
@@ -255,7 +283,7 @@ export class App extends React.Component {
           <Button
             buttonType="primary"
             icon="Search"
-            onClick={this.checkFieldValue}
+            onClick={this.submitSearchQuery}
           >
             Search
           </Button>
