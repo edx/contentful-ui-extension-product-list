@@ -1,6 +1,6 @@
 {
-  "id": "edx-contentful-product-list",
-  "name": "edx-contentful-product-list",
+  "id": "edx-contentful-ui-extension-product-list",
+  "name": "edx-contentful-ui-extension-product-list",
   "srcdoc": "./build/index.html",
   "fieldTypes": [
     "Object"
